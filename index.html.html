@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocent — AI Student Mentor & Productivity Engine</title>
+
+    <!-- Inline SVG Favicon to prevent 404 errors on static hosts -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='32' width='6' height='26' rx='3' fill='%234f46e5'/><rect x='20' y='20' width='6' height='42' rx='3' fill='%234f46e5'/><rect x='30' y='30' width='6' height='46' rx='3' fill='%230284c7'/><rect x='40' y='44' width='6' height='46' rx='3' fill='%2306b6d4'/></svg>">
+
+    <!-- Primary SEO Meta Tags -->
+    <meta name="description" content="Vocent — AI Student Mentor & Productivity Engine. Automate study schedules, run mistake autopsies, and optimize learning efficiency with personalized AI mentors.">
+    <meta name="theme-color" content="#090D16">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Vocent — AI Student Mentor & Productivity Engine">
+    <meta property="og:description" content="Automate study schedules, run mistake autopsies, and optimize learning efficiency with personalized AI mentors.">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React 18 & ReactDOM UMD -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts: Warm, Modern & High Readability -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        h1, h2, h3, h4, h5, h6, .font-heading {
+            font-family: 'Outfit', sans-serif;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+
+        @keyframes barWave {
+            0%, 100% { height: 4px; }
+            50% { height: 20px; }
+        }
+        .wave-bar {
+            width: 3.5px;
+            background-color: currentColor;
+            border-radius: 99px;
+            animation: barWave 0.8s infinite ease-in-out;
+        }
+        .wave-bar:nth-child(1) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.25s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.15s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+        .animate-mic-pulse {
+            animation: pulseGlow 1.2s infinite ease-in-out;
+        }
+
+        @keyframes floatUp {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-float { animation: floatUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="h-full overflow-x-hidden antialiased selection:bg-cyan-500 selection:text-white">
+    <div id="root" class="h-full"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        // Logo Icon
+        const VocentLogo = ({ className = "w-8 h-8" }) => (
+            <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="vocentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#312e81" />
+                        <stop offset="30%" stopColor="#4f46e5" />
+                        <stop offset="70%" stopColor="#0284c7" />
+                        <stop offset="100%" stopColor="#06b6d4" />
+                    </linearGradient>
+                </defs>
+                <rect x="10" y="32" width="6" height="26" rx="3" fill="url(#vocentGrad)" />
+                <rect x="20" y="20" width="6" height="42" rx="3" fill="url(#vocentGrad)" />
+                <rect x="30" y="30" width="6" height="46" rx="3" fill="url(#vocentGrad)" />
+                <rect x="40" y="44" width="6" height="46" rx="3" fill="url(#vocentGrad)" />
+                <rect x="50" y="36" width="6" height="42" rx="3" fill="url(#vocentGrad)" />
+                <rect x="60" y="22" width="6" height="46" rx="3" fill="url(#vocentGrad)" />
+                <rect x="70" y="16" width="6" height="38" rx="3" fill="url(#vocentGrad)" />
+                <rect x="80" y="26" width="6" height="22" rx="3" fill="url(#vocentGrad)" />
+            </svg>
+        );
+
+        // SVG Icon Helper
+        const Icon = ({ name, className = "w-4 h-4", onClick }) => {
+            const icons = {
+                sparkles: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />,
+                speaker: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />,
+                speakerMute: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />,
+                mic: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 016 0v6a3 3 0 01-3 3z" />,
+                calendar: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />,
+                mail: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />,
+                whatsapp: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2C6.48 2 2 6.48 2 12c0 2.17.7 4.19 1.9 5.86L2.5 21.5l3.77-1.35C7.88 21.28 9.87 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.85 0-3.57-.52-5.05-1.42l-.36-.22-2.24.8.8-2.2-.24-.38C3.98 15.12 3.5 13.62 3.5 12 3.5 7.31 7.31 3.5 12 3.5s8.5 3.81 8.5 8.5-3.81 8.5-8.5 8.5z" />,
+                camera: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />,
+                zap: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />,
+                send: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />,
+                chat: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />,
+                cpu: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M3 9h2m-2 6h2m14-6h2m-2 6h2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />,
+                palette: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />,
+                play: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />,
+                stop: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
+                settings: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />,
+                key: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />,
+                check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />,
+                trash: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            };
+
+            return (
+                <svg onClick={onClick} className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {icons[name] || null}
+                </svg>
+            );
+        };
+
+        // Formatting Helper Component for Markdown rendering
+        const FormattedText = ({ text }) => {
+            if (!text) return null;
+            
+            const lines = text.split('\n');
+            return (
+                <div className="space-y-1.5">
+                    {lines.map((line, idx) => {
+                        if (!line.trim()) return <div key={idx} className="h-1" />;
+
+                        // Bullet point formatting
+                        if (line.trim().startsWith('•') || line.trim().startsWith('- ')) {
+                            const content = line.replace(/^[•\-]\s*/, '');
+                            return (
+                                <div key={idx} className="flex items-start space-x-2 pl-1">
+                                    <span className="text-cyan-400 font-bold">•</span>
+                                    <span>{renderInlineMarkdown(content)}</span>
+                                </div>
+                            );
+                        }
+
+                        // Header formatting
+                        if (line.trim().startsWith('### ')) {
+                            return <h4 key={idx} className="font-bold text-sm text-cyan-300 mt-2 mb-1">{line.replace('### ', '')}</h4>;
+                        }
+
+                        return <p key={idx}>{renderInlineMarkdown(line)}</p>;
+                    })}
+                </div>
+            );
+        };
+
+        const renderInlineMarkdown = (text) => {
+            const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
+            return parts.map((part, index) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    return <strong key={index} className="font-extrabold text-amber-300">{part.slice(2, -2)}</strong>;
+                }
+                if (part.startsWith('*') && part.endsWith('*')) {
+                    return <em key={index} className="italic text-slate-200">{part.slice(1, -1)}</em>;
+                }
+                if (part.startsWith('`') && part.endsWith('`')) {
+                    return <code key={index} className="bg-black/40 px-1.5 py-0.5 rounded font-mono text-[11px] text-cyan-300 border border-cyan-500/20">{part.slice(1, -1)}</code>;
+                }
+                return part;
+            });
+        };
+
+        const THEMES = {
+            cyberNeon: {
+                id: "cyberNeon",
+                name: "⚡ Modern Cyber",
+                bg: "bg-[#090D16]",
+                cardBg: "bg-[#111827]/90 backdrop-blur-xl",
+                cardBorder: "border-indigo-500/30",
+                textPrimary: "text-slate-100",
+                textSecondary: "text-slate-400",
+                accentBg: "bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400",
+                accentText: "text-cyan-400",
+                badgeBg: "bg-indigo-500/20 border-indigo-500/30",
+                badgeText: "text-indigo-300",
+                glow: "shadow-[0_8px_30px_rgba(99,102,241,0.15)]",
+                bubbleUser: "bg-indigo-600 text-white font-medium",
+                bubbleMentor: "bg-[#1A2338] border border-indigo-500/20 text-slate-100"
+            },
+            jarvisGold: {
+                id: "jarvisGold",
+                name: "🛡 Stark Titanium",
+                bg: "bg-[#0E0B07]",
+                cardBg: "bg-[#1C1610]/90 backdrop-blur-xl",
+                cardBorder: "border-amber-500/30",
+                textPrimary: "text-amber-50",
+                textSecondary: "text-amber-200/60",
+                accentBg: "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500",
+                accentText: "text-amber-400",
+                badgeBg: "bg-amber-500/20 border-amber-500/30",
+                badgeText: "text-amber-300",
+                glow: "shadow-[0_8px_30px_rgba(245,158,11,0.15)]",
+                bubbleUser: "bg-amber-600 text-white font-medium",
+                bubbleMentor: "bg-[#281E15] border border-amber-500/20 text-amber-50"
+            },
+            edithLime: {
+                id: "edithLime",
+                name: "👓 EDITH Tactical Glass",
+                bg: "bg-[#05110A]",
+                cardBg: "bg-[#0D2115]/90 backdrop-blur-xl",
+                cardBorder: "border-emerald-500/30",
+                textPrimary: "text-emerald-50",
+                textSecondary: "text-emerald-200/60",
+                accentBg: "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400",
+                accentText: "text-emerald-400",
+                badgeBg: "bg-emerald-500/20 border-emerald-500/30",
+                badgeText: "text-emerald-300",
+                glow: "shadow-[0_8px_30px_rgba(16,185,129,0.15)]",
+                bubbleUser: "bg-emerald-600 text-white font-medium",
+                bubbleMentor: "bg-[#142D1E] border border-emerald-500/20 text-emerald-50"
+            },
+            friendlyLight: {
+                id: "friendlyLight",
+                name: "☀ Friendly Daylight",
+                bg: "bg-[#F8FAFC]",
+                cardBg: "bg-white/95 backdrop-blur-xl",
+                cardBorder: "border-slate-200",
+                textPrimary: "text-slate-900",
+                textSecondary: "text-slate-500",
+                accentBg: "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500",
+                accentText: "text-indigo-600",
+                badgeBg: "bg-indigo-50 border-indigo-200",
+                badgeText: "text-indigo-700",
+                glow: "shadow-[0_10px_25px_rgba(0,0,0,0.06)]",
+                bubbleUser: "bg-indigo-600 text-white font-medium",
+                bubbleMentor: "bg-slate-100 border border-slate-200 text-slate-800"
+            },
+            vibranium: {
+                id: "vibranium",
+                name: "🔮 Vibranium Obsidian",
+                bg: "bg-[#0A0714]",
+                cardBg: "bg-[#140E26]/90 backdrop-blur-xl",
+                cardBorder: "border-purple-500/30",
+                textPrimary: "text-purple-50",
+                textSecondary: "text-purple-200/60",
+                accentBg: "bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500",
+                accentText: "text-fuchsia-400",
+                badgeBg: "bg-purple-500/20 border-purple-500/30",
+                badgeText: "text-fuchsia-300",
+                glow: "shadow-[0_8px_30px_rgba(168,85,247,0.2)]",
+                bubbleUser: "bg-purple-600 text-white font-medium",
+                bubbleMentor: "bg-[#1E1338] border border-purple-500/20 text-purple-50"
+            }
+        };
+
+        const MARVEL_ASSISTANTS = {
+            jarvis: {
+                id: "jarvis",
+                spokenName: "Jarvis",
+                fullName: "J.A.R.V.I.S.",
+                title: "Smooth Student Productivity Coach",
+                gender: "male",
+                pitch: 0.85,
+                rate: 0.95,
+                greeting: "Hello Boss! Jarvis online to elevate your study productivity. Ready to automate schedules and achieve maximum focus today?",
+                prompt: "You are Jarvis, an intelligent, high-productivity academic AI mentor. Speak in clear, warm, polite, and empowering English. Address the student casually as 'Boss'. Help them stay productive, energized, and organized through automated tasks."
+            },
+            friday: {
+                id: "friday",
+                spokenName: "Friday",
+                fullName: "F.R.I.D.A.Y.",
+                title: "Tactical & Intuitive Mentor",
+                gender: "female",
+                pitch: 1.15,
+                rate: 1.02,
+                greeting: "Boss, F.R.I.D.A.Y. online! Let's eliminate study inertia, automate your tasks, and crush your targets today!",
+                prompt: "You are F.R.I.D.A.Y., a quick-witted, intuitive, loyal academic coach. Speak in a confident, crisp female tone. Address the student smoothly as 'Boss' and deliver motivating, action-oriented study coaching."
+            },
+            edith: {
+                id: "edith",
+                spokenName: "Edith",
+                fullName: "E.D.I.T.H.",
+                title: "Tactical Concept & Vision AI",
+                gender: "female",
+                pitch: 1.25,
+                rate: 1.05,
+                greeting: "E.D.I.T.H. student HUD connected. Let's analyze practice problems and optimize your learning efficiency.",
+                prompt: "You are Edith, a sleek high-tech learning HUD assistant. Speak with a crisp, precise female tone. Keep explanations structured, visual, and highly efficient."
+            },
+            karen: {
+                id: "karen",
+                spokenName: "Karen",
+                fullName: "K.A.R.E.N.",
+                title: "Warm & Supportive Study Companion",
+                gender: "female",
+                pitch: 1.08,
+                rate: 0.98,
+                greeting: "Hi there! Karen here. Don't worry if study material feels overwhelming—we'll break it down together into simple, actionable steps!",
+                prompt: "You are Karen, a super supportive and warm student companion. Speak in an encouraging, friendly tone that builds confidence and eases academic stress."
+            },
+            taras: {
+                id: "taras",
+                spokenName: "Taras",
+                fullName: "T.A.R.A.S.",
+                title: "Strategic Ranker & Performance AI",
+                gender: "male",
+                pitch: 0.70,
+                rate: 0.92,
+                greeting: "T.A.R.A.S. strategic core connected. Target exams initialized. What high-yield topic shall we conquer today?",
+                prompt: "You are Taras, an elite strategic academic core AI. Focus on high-yield exam strategy, active recall techniques, and productivity optimization."
+            }
+        };
+
+        function getSystemInstruction(assistantKey) {
+            const assistant = MARVEL_ASSISTANTS[assistantKey] || MARVEL_ASSISTANTS.jarvis;
+            return `${assistant.prompt}
+You can trigger automated student productivity actions when asked (such as scheduling sessions, plan repair, email drafting, or messaging study groups).
+When an action is triggered, wrap the JSON payload in a code block with 'json':
+\`\`\`json
+{
+  "hasAction": true,
+  "actionType": "warmup_timer" | "plan_repair" | "calendar_add" | "whatsapp_send" | "email_draft",
+  "actionTitle": "Brief action title",
+  "actionDetails": "Detailed human readable description",
+  "recipient": "Optional phone number or email address if applicable",
+  "draftText": "Optional draft text if applicable",
+  "warmupProblem": "Optional warmup problem text if applicable"
+}
+\`\`\``;
+        }
+
+        const computeVoiceMap = (voices) => {
+            if (!voices || voices.length === 0) return {};
+
+            const engVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+            const pool = engVoices.length > 0 ? engVoices : voices;
+
+            const MALE_KW = ['david', 'george', 'daniel', 'oliver', 'alex', 'fred', 'guy', 'james', 'richard', 'mark', 'male', 'man'];
+            const FEMALE_KW = ['moira', 'fiona', 'zira', 'samantha', 'victoria', 'karen', 'aria', 'jenny', 'eva', 'hazel', 'susan', 'serena', 'stephanie', 'female', 'woman'];
+
+            const isMaleVoice = (v) => {
+                const name = v.name.toLowerCase();
+                return MALE_KW.some(k => name.includes(k)) && !FEMALE_KW.some(k => name.includes(k));
+            };
+
+            const isFemaleVoice = (v) => {
+                const name = v.name.toLowerCase();
+                return FEMALE_KW.some(k => name.includes(k)) && !MALE_KW.some(k => name.includes(k));
+            };
+
+            const malePool = pool.filter(isMaleVoice);
+            const femalePool = pool.filter(isFemaleVoice);
+
+            const pickVoice = (preferredKeywords, voicePool, fallbackPool) => {
+                for (const kw of preferredKeywords) {
+                    const match = voicePool.find(v => v.name.toLowerCase().includes(kw));
+                    if (match) return match;
+                }
+                for (const kw of preferredKeywords) {
+                    const match = fallbackPool.find(v => v.name.toLowerCase().includes(kw));
+                    if (match) return match;
+                }
+                return voicePool[0] || fallbackPool[0] || pool[0];
+            };
+
+            return {
+                jarvis: pickVoice(['daniel', 'george', 'oliver', 'david', 'james', 'alex'], malePool, pool),
+                friday: pickVoice(['moira', 'fiona', 'serena', 'victoria', 'aria', 'samantha'], femalePool, pool),
+                edith: pickVoice(['samantha', 'victoria', 'aria', 'jenny', 'zira', 'karen'], femalePool, pool),
+                karen: pickVoice(['karen', 'serena', 'hazel', 'susan', 'zira'], femalePool, pool),
+                taras: pickVoice(['alex', 'fred', 'david', 'guy', 'mark'], malePool, pool)
+            };
+        };
+
+        function App() {
+            // Persistent Theme & Voice States
+            const [currentThemeKey, setCurrentThemeKey] = useState(() => localStorage.getItem("vocent_theme") || "cyberNeon");
+            const [selectedAssistantKey, setSelectedAssistantKey] = useState(() => localStorage.getItem("vocent_assistant") || "jarvis");
+            const [systemVoices, setSystemVoices] = useState([]);
+            const [manualOverrides, setManualOverrides] = useState({});
+            const [isSpeaking, setIsSpeaking] = useState(false);
+            const [currentSpeakingId, setCurrentSpeakingId] = useState(null);
+            const [autoReadVoice, setAutoReadVoice] = useState(true);
+
+            // Active Utterance Ref
+            const activeUtteranceRef = useRef(null);
+
+            // API Key State with Sync
+            const [apiKey, setApiKey] = useState(() => localStorage.getItem("vocent_gemini_api_key") || "");
+            const [inputApiKey, setInputApiKey] = useState(apiKey);
+
+            // Voice Dictation (Speech-to-Text) State
+            const [isListening, setIsListening] = useState(false);
+            const recognitionRef = useRef(null);
+
+            // Toast / Notification State
+            const [toastMessage, setToastMessage] = useState(null);
+
+            // Tab & Chat States
+            const [activeTab, setActiveTab] = useState("chat");
+            const [chatInput, setChatInput] = useState("");
+            const [chatMessages, setChatMessages] = useState([
+                {
+                    id: 1,
+                    sender: "mentor",
+                    assistantKey: selectedAssistantKey,
+                    text: MARVEL_ASSISTANTS[selectedAssistantKey]?.greeting || MARVEL_ASSISTANTS.jarvis.greeting,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }
+            ]);
+            const [geminiHistory, setGeminiHistory] = useState([]);
+            const [isLoading, setIsLoading] = useState(false);
+
+            // Trinity Engine States
+            const [timeLeft, setTimeLeft] = useState(120);
+            const [timerActive, setTimerActive] = useState(false);
+            const [activeWarmupProblem, setActiveWarmupProblem] = useState("Calculate the electric field at point P due to a point charge of +5μC at a distance of 0.3m.");
+            const [calendarEvents, setCalendarEvents] = useState([
+                { id: 1, title: "Physics: Thermodynamics Review", time: "Today • 6:00 PM - 7:00 PM", status: "Scheduled" },
+                { id: 2, title: "Maths: Calculus Integration Drills", time: "Tomorrow • 5:00 PM - 6:30 PM", status: "Upcoming" }
+            ]);
+            const [planRepaired, setPlanRepaired] = useState(false);
+
+            // Autopsy Vision AI States
+            const [autopsyTag, setAutopsyTag] = useState("silly");
+            const [autopsyResult, setAutopsyResult] = useState(null);
+            const [selectedAutopsyImage, setSelectedAutopsyImage] = useState(null);
+            const [autopsyImagePreview, setAutopsyImagePreview] = useState(null);
+            const fileInputRef = useRef(null);
+
+            // Modal States
+            const [whatsappModal, setWhatsappModal] = useState({ open: false, phone: "", message: "" });
+            const [emailModal, setEmailModal] = useState({ open: false, to: "", subject: "", body: "" });
+            const [showVoiceModal, setShowVoiceModal] = useState(false);
+
+            const chatContainerRef = useRef(null);
+
+            const theme = THEMES[currentThemeKey] || THEMES.cyberNeon;
+            const currentAssistant = MARVEL_ASSISTANTS[selectedAssistantKey] || MARVEL_ASSISTANTS.jarvis;
+
+            const showNotification = (msg) => {
+                setToastMessage(msg);
+                setTimeout(() => setToastMessage(null), 4000);
+            };
+
+            // Save Theme & Assistant in LocalStorage
+            useEffect(() => {
+                localStorage.setItem("vocent_theme", currentThemeKey);
+            }, [currentThemeKey]);
+
+            useEffect(() => {
+                localStorage.setItem("vocent_assistant", selectedAssistantKey);
+            }, [selectedAssistantKey]);
+
+            const handleSaveApiKey = (keyToSave) => {
+                const trimmed = (keyToSave || "").trim();
+                setApiKey(trimmed);
+                setInputApiKey(trimmed);
+                if (trimmed) {
+                    localStorage.setItem("vocent_gemini_api_key", trimmed);
+                    showNotification("✓ Gemini API Key saved! Live AI mentor responses enabled.");
+                } else {
+                    localStorage.removeItem("vocent_gemini_api_key");
+                    showNotification("API Key cleared. App switched to Demo Mode.");
+                }
+            };
+
+            useEffect(() => {
+                const updateVoices = () => {
+                    if ('speechSynthesis' in window) {
+                        try {
+                            const voices = window.speechSynthesis.getVoices();
+                            if (voices && voices.length > 0) {
+                                setSystemVoices(voices);
+                            }
+                        } catch (e) {
+                            console.warn("SpeechSynthesis voices load issue:", e);
+                        }
+                    }
+                };
+
+                updateVoices();
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.onvoiceschanged = updateVoices;
+                }
+                return () => {
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.onvoiceschanged = null;
+                    }
+                };
+            }, []);
+
+            const lockedVoiceMap = useMemo(() => {
+                return computeVoiceMap(systemVoices);
+            }, [systemVoices]);
+
+            useEffect(() => {
+                try {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    if (SpeechRecognition) {
+                        const recognition = new SpeechRecognition();
+                        recognition.continuous = false;
+                        recognition.interimResults = true;
+                        recognition.lang = 'en-US';
+
+                        recognition.onresult = (event) => {
+                            const transcript = Array.from(event.results)
+                                .map(result => result[0].transcript)
+                                .join('');
+                            setChatInput(transcript);
+                        };
+
+                        recognition.onerror = (event) => {
+                            console.warn('Speech recognition error:', event.error);
+                            setIsListening(false);
+                            if (event.error === 'not-allowed') {
+                                showNotification("Microphone access blocked. Please grant microphone permissions in browser.");
+                            }
+                        };
+
+                        recognition.onend = () => {
+                            setIsListening(false);
+                        };
+
+                        recognitionRef.current = recognition;
+                    }
+                } catch (err) {
+                    console.warn("SpeechRecognition initialization skipped:", err);
+                }
+            }, []);
+
+            const toggleListening = () => {
+                if (!recognitionRef.current) {
+                    showNotification("Speech recognition is not supported in this browser. Try Chrome or Edge!");
+                    return;
+                }
+                if (isListening) {
+                    recognitionRef.current.stop();
+                    setIsListening(false);
+                } else {
+                    try {
+                        recognitionRef.current.start();
+                        setIsListening(true);
+                    } catch (e) {
+                        console.warn("Recognition start error:", e);
+                        setIsListening(false);
+                    }
+                }
+            };
+
+            const stopSpeech = useCallback(() => {
+                if ('speechSynthesis' in window) {
+                    try {
+                        window.speechSynthesis.cancel();
+                    } catch (e) {
+                        console.warn("Speech cancel error:", e);
+                    }
+                }
+                activeUtteranceRef.current = null;
+                setIsSpeaking(false);
+                setCurrentSpeakingId(null);
+            }, []);
+
+            const speakText = useCallback((textToSpeak, msgId = null, targetAssistantKey = null) => {
+                stopSpeech();
+
+                if (!('speechSynthesis' in window)) {
+                    console.warn("Speech synthesis is not supported in this browser environment.");
+                    return;
+                }
+
+                const assistantKeyToUse = targetAssistantKey || selectedAssistantKey;
+                const assistant = MARVEL_ASSISTANTS[assistantKeyToUse] || MARVEL_ASSISTANTS.jarvis;
+
+                let cleanSpeechText = textToSpeak
+                    .replace(/```[\s\S]*?```/g, '')
+                    .replace(/`([^`]+)`/g, '$1')
+                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                    .replace(/[\*\#\_\~\>\-\+]/g, ' ')
+                    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+                    .replace(/J\.A\.R\.V\.I\.S\./gi, 'Jarvis')
+                    .replace(/F\.R\.I\.D\.A\.Y\./gi, 'Friday')
+                    .replace(/E\.D\.I\.T\.H\./gi, 'Edith')
+                    .replace(/K\.A\.R\.E\.N\./gi, 'Karen')
+                    .replace(/T\.A\.R\.A\.S\./gi, 'Taras')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+
+                if (!cleanSpeechText) return;
+
+                try {
+                    const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
+                    activeUtteranceRef.current = utterance;
+
+                    utterance.pitch = assistant.pitch;
+                    utterance.rate = assistant.rate;
+                    utterance.lang = 'en-US';
+
+                    let voiceToUse = null;
+                    if (manualOverrides[assistantKeyToUse]) {
+                        voiceToUse = systemVoices.find(v => v.name === manualOverrides[assistantKeyToUse]);
+                    }
+                    if (!voiceToUse) {
+                        voiceToUse = lockedVoiceMap[assistantKeyToUse];
+                    }
+
+                    if (voiceToUse) {
+                        utterance.voice = voiceToUse;
+                    }
+
+                    utterance.onstart = () => {
+                        setIsSpeaking(true);
+                        setCurrentSpeakingId(msgId);
+                    };
+
+                    utterance.onend = () => {
+                        setIsSpeaking(false);
+                        setCurrentSpeakingId(null);
+                        activeUtteranceRef.current = null;
+                    };
+
+                    utterance.onerror = (e) => {
+                        console.warn("TTS Speech error:", e);
+                        setIsSpeaking(false);
+                        setCurrentSpeakingId(null);
+                        activeUtteranceRef.current = null;
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                } catch (err) {
+                    console.warn("TTS execution failed:", err);
+                }
+            }, [stopSpeech, selectedAssistantKey, manualOverrides, systemVoices, lockedVoiceMap]);
+
+            const handleAssistantChange = (newKey) => {
+                stopSpeech();
+                setSelectedAssistantKey(newKey);
+
+                const newAssistant = MARVEL_ASSISTANTS[newKey] || MARVEL_ASSISTANTS.jarvis;
+                const newMsgId = Date.now();
+
+                const switchMsg = {
+                    id: newMsgId,
+                    sender: "mentor",
+                    assistantKey: newKey,
+                    text: newAssistant.greeting,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+
+                setChatMessages(prev => [...prev, switchMsg]);
+
+                if (autoReadVoice) {
+                    setTimeout(() => {
+                        speakText(newAssistant.greeting, newMsgId, newKey);
+                    }, 120);
+                }
+            };
+
+            useEffect(() => {
+                if (chatContainerRef.current) {
+                    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+                }
+            }, [chatMessages, isLoading]);
+
+            useEffect(() => {
+                let interval = null;
+                if (timerActive && timeLeft > 0) {
+                    interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+                } else if (timeLeft === 0) {
+                    setTimerActive(false);
+                    showNotification("⏰ 2-Minute Sprint Completed! Great active focus!");
+                }
+                return () => clearInterval(interval);
+            }, [timerActive, timeLeft]);
+
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            };
+
+            const generateDemoAssistantResponse = (userText) => {
+                const lower = userText.toLowerCase();
+                const assistant = MARVEL_ASSISTANTS[selectedAssistantKey] || MARVEL_ASSISTANTS.jarvis;
+                const bossTerm = assistant.id === 'jarvis' || assistant.id === 'friday' ? 'Boss' : assistant.id === 'edith' ? 'Agent' : assistant.id === 'karen' ? 'friend' : 'Candidate';
+
+                if (lower.includes("schedule") || lower.includes("study session") || lower.includes("practice block")) {
+                    return `Certainly ${bossTerm}! I have configured a targeted practice session based on your current focus areas.\n\`\`\`json\n{\n  "hasAction": true,\n  "actionType": "calendar_add",\n  "actionTitle": "Physics Conceptual Practice",\n  "actionDetails": "45-minute active recall drill covering Electromagnetic Induction & Gauss Law."\n}\n\`\`\``;
+                }
+                if (lower.includes("whatsapp") || lower.includes("group") || lower.includes("message")) {
+                    return `Copy that ${bossTerm}! Here is the prepared update message for your study circle ready to broadcast:\n\`\`\`json\n{\n  "hasAction": true,\n  "actionType": "whatsapp_send",\n  "actionTitle": "WhatsApp Study Circle Alert",\n  "actionDetails": "Send revision notice to your study squad.",\n  "draftText": "Hey team! Remind everyone we are revising Organic Chemistry reaction mechanisms tomorrow at 5 PM sharp. Bring your formula sheets!"\n}\n\`\`\``;
+                }
+                if (lower.includes("email") || lower.includes("teacher") || lower.includes("doubt")) {
+                    return `Draft generated and ready for review ${bossTerm}:\n\`\`\`json\n{\n  "hasAction": true,\n  "actionType": "email_draft",\n  "actionTitle": "Doubt Clarification Request",\n  "recipient": "physics.teacher@school.edu",\n  "actionDetails": "Polite inquiry regarding integration application in Kinematics.",\n  "draftText": "Dear Teacher,\\n\\nI was reviewing today's physics lecture on Kinematics and had a minor doubt regarding variable acceleration integration.\\n\\nCould I stop by during office hours for 5 minutes?\\n\\nBest regards."\n}\n\`\`\``;
+                }
+                if (lower.includes("missed") || lower.includes("repair") || lower.includes("backlog")) {
+                    return `Analyzing missed schedule blocks... I have devised a non-fatiguing redistribution plan to cover the backlog without burnout!\n\`\`\`json\n{\n  "hasAction": true,\n  "actionType": "plan_repair",\n  "actionTitle": "Smart Backlog Redistribution",\n  "actionDetails": "Split 2 missed study hours into two 30-minute light micro-slots over Thursday & Friday."\n}\n\`\`\``;
+                }
+
+                return `💡 [Demo Mode Active]\n\nUnderstood ${bossTerm}! To get live custom AI answers to any question, please tap "Set Key" or open Settings to enter your Google Gemini API Key.\n\nIn the meantime, try asking me to "schedule a study session", "repair missed schedule", "draft a WhatsApp message", or "email teacher"!`;
+            };
+
+            const callGeminiAPI = async (userText, updatedHistory) => {
+                const currentKey = apiKey || localStorage.getItem("vocent_gemini_api_key") || "";
+                
+                if (!currentKey) {
+                    await new Promise(res => setTimeout(res, 600));
+                    return generateDemoAssistantResponse(userText);
+                }
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${currentKey}`;
+
+                const payload = {
+                    contents: updatedHistory,
+                    systemInstruction: {
+                        parts: [{ text: getSystemInstruction(selectedAssistantKey) }]
+                    }
+                };
+
+                let retries = 0;
+                let delay = 1000;
+
+                while (retries < 3) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const errData = await response.json().catch(() => ({}));
+                            throw new Error(`API Error ${response.status}: ${errData.error?.message || response.statusText}`);
+                        }
+
+                        const data = await response.json();
+                        const candidate = data.candidates?.[0];
+                        const text = candidate?.content?.parts?.[0]?.text;
+
+                        if (text) return text;
+                        throw new Error("Invalid response structure");
+                    } catch (err) {
+                        console.warn("Gemini API call attempt failed:", err);
+                        retries++;
+                        if (retries >= 3) {
+                            showNotification("Gemini API key error or connection timeout. Falling back to Demo Mode.");
+                            return generateDemoAssistantResponse(userText);
+                        }
+                        await new Promise(res => setTimeout(res, delay));
+                        delay *= 2;
+                    }
+                }
+            };
+
+            const handleSendMessage = async (customPrompt) => {
+                const currentText = customPrompt || chatInput;
+                if (!currentText.trim() || isLoading) return;
+
+                if (isListening) {
+                    recognitionRef.current?.stop();
+                    setIsListening(false);
+                }
+
+                setChatInput("");
+                stopSpeech();
+
+                const userMsg = {
+                    id: Date.now(),
+                    sender: "user",
+                    text: currentText,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+
+                setChatMessages(prev => [...prev, userMsg]);
+                setIsLoading(true);
+
+                const newHistoryTurn = { role: "user", parts: [{ text: currentText }] };
+                const updatedHistory = [...geminiHistory, newHistoryTurn];
+
+                try {
+                    const rawAiResponse = await callGeminiAPI(currentText, updatedHistory);
+
+                    let cleanText = rawAiResponse;
+                    let parsedAction = null;
+
+                    const jsonMatch = rawAiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+                    if (jsonMatch && jsonMatch[1]) {
+                        try {
+                            parsedAction = JSON.parse(jsonMatch[1]);
+                            cleanText = rawAiResponse.replace(/```json\s*[\s\S]*?\s*```/, '').trim();
+                        } catch (pErr) {
+                            console.warn("Action card JSON parse skipped:", pErr);
+                        }
+                    }
+
+                    setGeminiHistory([...updatedHistory, { role: "model", parts: [{ text: rawAiResponse }] }]);
+
+                    const botMsgId = Date.now() + 1;
+                    const botMsg = {
+                        id: botMsgId,
+                        sender: "mentor",
+                        assistantKey: selectedAssistantKey,
+                        text: cleanText,
+                        actionCard: parsedAction?.hasAction ? parsedAction : null,
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    };
+
+                    setChatMessages(prev => [...prev, botMsg]);
+
+                    if (autoReadVoice) {
+                        speakText(cleanText, botMsgId, selectedAssistantKey);
+                    }
+                } catch (err) {
+                    console.error("Gemini API Error:", err);
+                    setChatMessages(prev => [
+                        ...prev,
+                        {
+                            id: Date.now() + 1,
+                            sender: "mentor",
+                            assistantKey: selectedAssistantKey,
+                            text: "I encountered a minor connection pause. Please re-check your connection or API key and try again!",
+                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        }
+                    ]);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const handleApplyAction = (msgId, action) => {
+                setChatMessages(prev => prev.map(m => {
+                    if (m.id === msgId && m.actionCard) {
+                        return { ...m, actionCard: { ...m.actionCard, applied: true } };
+                    }
+                    return m;
+                }));
+
+                if (action.actionType === 'warmup_timer') {
+                    if (action.warmupProblem) setActiveWarmupProblem(action.warmupProblem);
+                    setTimeLeft(120);
+                    setTimerActive(true);
+                    setActiveTab("trinity");
+                    showNotification("🚀 2-Minute Warmup Sprint started!");
+                } else if (action.actionType === 'plan_repair') {
+                    setPlanRepaired(true);
+                    setActiveTab("trinity");
+                    showNotification("✓ Backlog schedule repaired!");
+                } else if (action.actionType === 'calendar_add') {
+                    setCalendarEvents(prev => [...prev, {
+                        id: Date.now(),
+                        title: action.actionTitle || "AI Target Session",
+                        time: "Upcoming Target",
+                        status: "Confirmed"
+                    }]);
+                    setActiveTab("trinity");
+                    showNotification("📅 Target session added to calendar!");
+                } else if (action.actionType === 'whatsapp_send') {
+                    setWhatsappModal({
+                        open: true,
+                        phone: action.recipient || "",
+                        message: action.draftText || action.actionDetails || ""
+                    });
+                } else if (action.actionType === 'email_draft') {
+                    setEmailModal({
+                        open: true,
+                        to: action.recipient || "",
+                        subject: action.actionTitle || "Academic Study Note",
+                        body: action.draftText || action.actionDetails || ""
+                    });
+                }
+            };
+
+            // Image Upload Handler for Autopsy
+            const handleImageSelect = (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                    setSelectedAutopsyImage(file);
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setAutopsyImagePreview(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                    showNotification("📷 Mock Test Image loaded! Ready for Autopsy.");
+                }
+            };
+
+            const runErrorDiagnosis = async () => {
+                const tagLabels = {
+                    concept: "Concept Gap (Formula / Core Theory)",
+                    silly: "Silly Slip (Calculation or Sign Mistake)",
+                    time: "Time Pressure Rush / Panic",
+                    misread: "Misread Question Data"
+                };
+
+                if (apiKey && selectedAutopsyImage && autopsyImagePreview) {
+                    setIsLoading(true);
+                    try {
+                        const base64Data = autopsyImagePreview.split(',')[1];
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+                        const payload = {
+                            contents: [{
+                                parts: [
+                                    { text: `Analyze this student mock test mistake image. Tag category: ${tagLabels[autopsyTag]}. Provide a concise diagnostic breakdown with cause, conceptual correction, and schedule adjustment.` },
+                                    { inline_data: { mime_type: selectedAutopsyImage.type || "image/jpeg", data: base64Data } }
+                                ]
+                            }]
+                        };
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const data = await response.json();
+                        const visionText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                        if (visionText) {
+                            setAutopsyResult({
+                                cause: `${tagLabels[autopsyTag]} (Vision AI Verified)`,
+                                recommendation: visionText,
+                                suggestedAction: "Added 15-minute diagnostic drill block to tomorrow's schedule."
+                            });
+                            setIsLoading(false);
+                            return;
+                        }
+                    } catch (err) {
+                        console.warn("Vision API diagnosis fallback:", err);
+                    }
+                    setIsLoading(false);
+                }
+
+                // Default Fallback / Demo Diagnosis
+                setAutopsyResult({
+                    cause: tagLabels[autopsyTag] || "Silly Calculation / Sign Mistake",
+                    recommendation: "Re-derive the problem step without looking at hints. Attempt 3 similar practice questions on active recall.",
+                    suggestedAction: "Added 15-minute diagnostic drill block to tomorrow's schedule."
+                });
+            };
+
+            const executeWhatsAppLaunch = () => {
+                const encodedMsg = encodeURIComponent(whatsappModal.message);
+                const url = whatsappModal.phone 
+                    ? `https://api.whatsapp.com/send?phone=${whatsappModal.phone.replace(/[^0-9]/g, '')}&text=${encodedMsg}`
+                    : `https://api.whatsapp.com/send?text=${encodedMsg}`;
+                window.open(url, '_blank');
+                setWhatsappModal({ open: false, phone: "", message: "" });
+            };
+
+            const executeEmailLaunch = () => {
+                const url = `mailto:${emailModal.to}?subject=${encodeURIComponent(emailModal.subject)}&body=${encodeURIComponent(emailModal.body)}`;
+                window.location.href = url;
+                setEmailModal({ open: false, to: "", subject: "", body: "" });
+            };
+
+            return (
+                <div className={`min-h-screen ${theme.bg} ${theme.textPrimary} flex flex-col font-sans transition-colors duration-300 relative`}>
+                    
+                    {/* Toast Notification Banner */}
+                    {toastMessage && (
+                        <div className="fixed top-4 right-4 z-50 bg-amber-500 text-slate-950 font-bold px-4 py-2.5 rounded-2xl shadow-xl flex items-center space-x-2 text-xs border border-amber-300 animate-float">
+                            <span>ℹ️️ {toastMessage}</span>
+                            <button onClick={() => setToastMessage(null)} className="ml-2 text-slate-900 hover:text-white font-extrabold" aria-label="Close notification">✕</button>
+                        </div>
+                    )}
+
+                    {/* Header */}
+                    <header className={`border-b ${theme.cardBorder} ${theme.cardBg} ${theme.glow} px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-md`}>
+                        <div className="flex items-center space-x-3">
+                            <div className="flex items-center justify-center p-1.5 rounded-2xl bg-black/30 border border-cyan-500/30 shadow-inner group">
+                                <VocentLogo className="w-8 h-8 md:w-9 md:h-9 transform group-hover:scale-105 transition-transform" />
+                            </div>
+                            <div>
+                                <h1 className="font-heading font-extrabold text-xl md:text-2xl tracking-tight flex items-center space-x-2">
+                                    <span className="bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent">
+                                        Vocent
+                                    </span>
+                                    <span className={`text-[10px] font-sans font-bold px-2.5 py-0.5 rounded-full border ${theme.badgeBg} ${theme.badgeText} uppercase tracking-wider`}>
+                                        AI Mentor
+                                    </span>
+                                </h1>
+                                <p className={`text-[11px] ${theme.textSecondary} font-medium font-sans`}>
+                                    AI Student Mentor & Productivity Automation Engine
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Top Controls */}
+                        <div className="flex items-center space-x-2">
+                            
+                            {/* API Key Status Indicator */}
+                            <button 
+                                onClick={() => {
+                                    setInputApiKey(apiKey);
+                                    setShowVoiceModal(true);
+                                }}
+                                className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-mono font-bold flex items-center space-x-1.5 transition-all ${
+                                    apiKey 
+                                        ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' 
+                                        : 'border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+                                }`}
+                                title="Click to configure Gemini API Key"
+                                aria-label="Set Gemini API Key"
+                            >
+                                <Icon name="key" className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">{apiKey ? "API Key Set" : "Set API Key"}</span>
+                            </button>
+
+                            {/* Auto Read Voice Toggle */}
+                            <button 
+                                onClick={() => {
+                                    if (isSpeaking) stopSpeech();
+                                    setAutoReadVoice(!autoReadVoice);
+                                }}
+                                className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center space-x-1.5 transition-all ${autoReadVoice ? `${theme.badgeBg} ${theme.accentText}` : 'border-white/10 text-slate-400'}`}
+                                title="Toggle voice audio output"
+                                aria-label="Toggle Voice Audio Output"
+                            >
+                                <Icon name={autoReadVoice ? "speaker" : "speakerMute"} className="w-4 h-4" />
+                                <span className="hidden sm:inline">{autoReadVoice ? "Voice ON" : "Voice OFF"}</span>
+                            </button>
+
+                            {/* Assistant Switcher */}
+                            <div className={`flex items-center space-x-1 border rounded-xl px-2.5 py-1.5 bg-black/20 ${theme.cardBorder}`}>
+                                <Icon name="sparkles" className={`w-3.5 h-3.5 ${theme.accentText}`} />
+                                <select 
+                                    value={selectedAssistantKey}
+                                    onChange={(e) => handleAssistantChange(e.target.value)}
+                                    className={`text-xs font-bold rounded bg-transparent ${theme.textPrimary} focus:outline-none cursor-pointer`}
+                                    aria-label="Select Assistant Personality"
+                                >
+                                    {Object.values(MARVEL_ASSISTANTS).map((a) => (
+                                        <option key={a.id} value={a.id} className="bg-slate-900 text-slate-100">
+                                            {a.fullName} ({a.spokenName})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Voice & API Settings Modal Launcher */}
+                            <button 
+                                onClick={() => {
+                                    setInputApiKey(apiKey);
+                                    setShowVoiceModal(true);
+                                }}
+                                className={`p-2 rounded-xl border border-white/10 bg-black/20 hover:bg-white/10 ${theme.textPrimary} text-xs font-bold flex items-center space-x-1`}
+                                title="Voice & API Settings"
+                                aria-label="Voice and API Settings"
+                            >
+                                <Icon name="settings" className="w-4 h-4 text-cyan-400" />
+                            </button>
+
+                            {/* Theme Selector */}
+                            <div className={`flex items-center space-x-1 border rounded-xl px-2.5 py-1.5 bg-black/20 ${theme.cardBorder} hidden md:flex`}>
+                                <Icon name="palette" className="w-3.5 h-3.5 text-slate-400" />
+                                <select 
+                                    value={currentThemeKey} 
+                                    onChange={(e) => setCurrentThemeKey(e.target.value)}
+                                    className={`text-xs rounded bg-transparent ${theme.textPrimary} focus:outline-none cursor-pointer font-medium`}
+                                    aria-label="Select Theme"
+                                >
+                                    {Object.values(THEMES).map((t) => (
+                                        <option key={t.id} value={t.id} className="bg-slate-900 text-slate-100">{t.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Navigation Tabs */}
+                    <nav className={`border-b ${theme.cardBorder} px-4 py-2 flex space-x-2 overflow-x-auto text-xs bg-black/10`}>
+                        <button 
+                            onClick={() => setActiveTab("chat")}
+                            className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 ${activeTab === 'chat' ? `${theme.accentBg} text-white shadow-md` : `${theme.textSecondary} hover:bg-white/5`}`}
+                        >
+                            <Icon name="chat" className="w-4 h-4" />
+                            <span>AI Mentor Chat</span>
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab("trinity")}
+                            className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 ${activeTab === 'trinity' ? `${theme.accentBg} text-white shadow-md` : `${theme.textSecondary} hover:bg-white/5`}`}
+                        >
+                            <Icon name="calendar" className="w-4 h-4" />
+                            <span>Productivity & Plan Repair</span>
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab("autopsy")}
+                            className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 ${activeTab === 'autopsy' ? `${theme.accentBg} text-white shadow-md` : `${theme.textSecondary} hover:bg-white/5`}`}
+                        >
+                            <Icon name="camera" className="w-4 h-4" />
+                            <span>Mistake Autopsy</span>
+                        </button>
+                    </nav>
+
+                    {/* Main Content Layout */}
+                    <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        
+                        {/* Tab 1: AI Mentor Chat */}
+                        {activeTab === "chat" && (
+                            <div className={`lg:col-span-12 flex flex-col h-[680px] rounded-3xl border ${theme.cardBorder} overflow-hidden ${theme.cardBg} ${theme.glow} shadow-xl relative`}>
+                                
+                                {/* Status Banner */}
+                                <div className={`p-3.5 border-b ${theme.cardBorder} flex items-center justify-between flex-wrap gap-2 bg-black/20`}>
+                                    <div className="flex items-center space-x-2.5">
+                                        <span className={`w-2.5 h-2.5 rounded-full ${apiKey ? 'bg-emerald-400' : 'bg-amber-400'} animate-pulse`}></span>
+                                        <span className="text-xs font-bold tracking-wide flex items-center space-x-2">
+                                            <span>Vocent AI Mentor • {currentAssistant.fullName} Active</span>
+                                            <span className={`text-[10px] px-2.5 py-0.5 rounded-full border ${theme.badgeBg} ${theme.badgeText}`}>
+                                                {apiKey ? "Live Gemini Flash" : "Demo Mode (Key Needed)"}
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    {/* Waveform & Speech Indicator */}
+                                    <div className="flex items-center space-x-3">
+                                        {isSpeaking && (
+                                            <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono">
+                                                <span>Speaking</span>
+                                                <div className="flex space-x-0.5 h-3.5 items-center">
+                                                    <div className="wave-bar"></div>
+                                                    <div className="wave-bar"></div>
+                                                    <div className="wave-bar"></div>
+                                                    <div className="wave-bar"></div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <button 
+                                            onClick={stopSpeech}
+                                            disabled={!isSpeaking}
+                                            className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${isSpeaking ? 'border-red-500/40 bg-red-500/20 text-red-300 hover:bg-red-500/30' : 'border-white/10 opacity-40 cursor-not-allowed'}`}
+                                        >
+                                            Stop Voice
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Messages Container */}
+                                <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+                                    {chatMessages.map((msg) => {
+                                        const msgAssistant = MARVEL_ASSISTANTS[msg.assistantKey] || MARVEL_ASSISTANTS[selectedAssistantKey] || currentAssistant;
+                                        const assignedVoiceName = manualOverrides[msgAssistant.id] || lockedVoiceMap[msgAssistant.id]?.name || "System Voice";
+
+                                        return (
+                                            <div 
+                                                key={msg.id} 
+                                                className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'} animate-float`}
+                                            >
+                                                <div className="flex items-center space-x-2 mb-1">
+                                                    <span className={`text-[11px] font-bold uppercase tracking-wider ${theme.textSecondary}`}>
+                                                        {msg.sender === 'user' ? 'You' : msgAssistant.spokenName}
+                                                    </span>
+                                                    <span className={`text-[10px] ${theme.textSecondary}`}>{msg.timestamp}</span>
+                                                </div>
+
+                                                <div className={`max-w-2xl rounded-2xl p-4 text-xs md:text-sm leading-relaxed shadow-md relative ${
+                                                    msg.sender === 'user' 
+                                                        ? theme.bubbleUser 
+                                                        : theme.bubbleMentor
+                                                }`}>
+                                                    <FormattedText text={msg.text} />
+
+                                                    {/* Voice Play Button */}
+                                                    {msg.sender === 'mentor' && (
+                                                        <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+                                                            <button 
+                                                                onClick={() => {
+                                                                    if (currentSpeakingId === msg.id && isSpeaking) {
+                                                                        stopSpeech();
+                                                                    } else {
+                                                                        speakText(msg.text, msg.id, msgAssistant.id);
+                                                                    }
+                                                                }}
+                                                                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1.5 ${
+                                                                    currentSpeakingId === msg.id && isSpeaking 
+                                                                        ? 'bg-amber-500 text-slate-950 font-bold' 
+                                                                        : 'bg-white/10 hover:bg-white/20 text-slate-200'
+                                                                }`}
+                                                            >
+                                                                <Icon name={currentSpeakingId === msg.id && isSpeaking ? "stop" : "play"} className="w-3.5 h-3.5" />
+                                                                <span>{currentSpeakingId === msg.id && isSpeaking ? "Stop Voice" : `Listen (${msgAssistant.spokenName})`}</span>
+                                                            </button>
+
+                                                            <span className="text-[10px] text-slate-400 font-mono truncate max-w-[180px]">
+                                                                {assignedVoiceName}
+                                                            </span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Action Card Block */}
+                                                    {msg.actionCard && (
+                                                        <div className="mt-3 p-3.5 rounded-xl border border-amber-500/30 bg-black/40 text-xs space-y-2 font-mono shadow-inner">
+                                                            <div className="flex justify-between items-center text-amber-400 font-bold font-sans">
+                                                                <span className="flex items-center space-x-1.5">
+                                                                    <Icon name="zap" className="w-4 h-4 text-amber-400" />
+                                                                    <span>{msg.actionCard.actionTitle || "Automated Productivity Action"}</span>
+                                                                </span>
+                                                                <span className="text-[10px] uppercase bg-amber-500/20 px-2 py-0.5 rounded text-amber-300 border border-amber-500/30">
+                                                                    {msg.actionCard.actionType}
+                                                                </span>
+                                                            </div>
+
+                                                            <p className="whitespace-pre-line text-slate-200 text-xs leading-normal font-sans">
+                                                                {msg.actionCard.actionDetails}
+                                                            </p>
+
+                                                            {msg.actionCard.warmupProblem && (
+                                                                <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-500/30 text-amber-200 text-xs font-sans">
+                                                                    <strong>Warmup Challenge:</strong> {msg.actionCard.warmupProblem}
+                                                                </div>
+                                                            )}
+
+                                                            <div className="pt-2 border-t border-white/10 flex justify-end font-sans">
+                                                                {!msg.actionCard.applied ? (
+                                                                    <button 
+                                                                        onClick={() => handleApplyAction(msg.id, msg.actionCard)}
+                                                                        className={`px-4 py-1.5 rounded-xl ${theme.accentBg} text-white text-xs font-bold transition-transform shadow hover:scale-105 flex items-center space-x-1.5`}
+                                                                    >
+                                                                        <Icon name="zap" className="w-3.5 h-3.5" />
+                                                                        <span>Execute Action (1-Tap)</span>
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="text-emerald-400 text-xs font-bold flex items-center space-x-1">
+                                                                        <span>✓ Automated Action Completed</span>
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+
+                                    {isLoading && (
+                                        <div className="flex items-center space-x-2 text-cyan-400 text-xs py-2 font-mono">
+                                            <Icon name="cpu" className="w-4 h-4 animate-spin" />
+                                            <span>{currentAssistant.spokenName} is preparing your study guidance...</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Quick Prompts */}
+                                <div className={`px-4 py-2 border-t ${theme.cardBorder} flex space-x-2 overflow-x-auto text-xs bg-black/20`}>
+                                    <button 
+                                        onClick={() => handleSendMessage("Schedule a 45-minute Physics practice block for tonight.")}
+                                        className="px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 whitespace-nowrap text-slate-200 font-medium"
+                                    >
+                                        📅 Schedule Study Session
+                                    </button>
+                                    <button 
+                                        onClick={() => handleSendMessage("Draft a WhatsApp update for my study group about revising Chemistry tomorrow.")}
+                                        className="px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 whitespace-nowrap text-slate-200 font-medium"
+                                    >
+                                        💬 WhatsApp Study Circle Update
+                                    </button>
+                                    <button 
+                                        onClick={() => handleSendMessage("Draft a polite email to my teacher asking for doubt clarification.")}
+                                        className="px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 whitespace-nowrap text-slate-200 font-medium"
+                                    >
+                                        ✉ Email Teacher for Doubt
+                                    </button>
+                                    <button 
+                                        onClick={() => handleSendMessage("I missed my 2-hour study block today! Repair my schedule without causing burnouts.")}
+                                        className="px-3 py-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 whitespace-nowrap text-slate-200 font-medium"
+                                    >
+                                        🔄 Repair Missed Schedule
+                                    </button>
+                                </div>
+
+                                {/* Input Form */}
+                                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className={`p-3 md:p-4 border-t ${theme.cardBorder} flex items-center space-x-2 bg-black/30`}>
+                                    <button 
+                                        type="button"
+                                        title="Upload Question for Autopsy"
+                                        aria-label="Upload Question for Autopsy"
+                                        onClick={() => setActiveTab("autopsy")}
+                                        className={`p-3 rounded-2xl border ${theme.cardBorder} hover:bg-white/10 text-slate-300 transition-all`}
+                                    >
+                                        <Icon name="camera" className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Mic Dictation Button */}
+                                    <button 
+                                        type="button"
+                                        onClick={toggleListening}
+                                        title={isListening ? "Listening... click to stop" : "Voice Dictation (Speech to Text)"}
+                                        aria-label={isListening ? "Stop Voice Dictation" : "Start Voice Dictation"}
+                                        className={`p-3 rounded-2xl border transition-all ${
+                                            isListening 
+                                                ? "bg-red-600/30 border-red-500 text-red-400 animate-mic-pulse" 
+                                                : `${theme.cardBorder} hover:bg-white/10 text-slate-300`
+                                        }`}
+                                    >
+                                        <Icon name="mic" className="w-5 h-5" />
+                                    </button>
+
+                                    <input 
+                                        type="text"
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        placeholder={isListening ? "Listening to your voice..." : `Ask mentor ${currentAssistant.spokenName} or dictate study goals...`}
+                                        className={`flex-1 text-xs md:text-sm rounded-2xl px-4 py-3 border ${theme.cardBorder} bg-black/40 ${theme.textPrimary} focus:outline-none focus:ring-2 focus:ring-[#6366F1]/50`}
+                                    />
+
+                                    <button 
+                                        type="submit"
+                                        disabled={isLoading || !chatInput.trim()}
+                                        className={`px-5 py-3 rounded-2xl ${theme.accentBg} text-white text-xs md:text-sm font-bold flex items-center space-x-1.5 disabled:opacity-50 shadow-md hover:scale-105 transition-transform`}
+                                    >
+                                        <span>Send</span>
+                                        <Icon name="send" className="w-4 h-4" />
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Tab 2: Productivity & Schedule Engine */}
+                        {activeTab === "trinity" && (
+                            <>
+                                <div className="lg:col-span-7 flex flex-col space-y-5">
+                                    {/* Plan Repair Card */}
+                                    <div className={`p-6 rounded-3xl border ${theme.cardBorder} ${theme.cardBg} ${theme.glow} space-y-4 shadow-xl`}>
+                                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                            <div className="flex items-center space-x-2">
+                                                <Icon name="zap" className={`w-5 h-5 ${theme.accentText}`} />
+                                                <h2 className="text-sm md:text-base font-bold font-heading">Automated Schedule Repair</h2>
+                                            </div>
+                                            <span className={`text-[10px] px-2.5 py-0.5 rounded-full border ${theme.badgeBg} ${theme.badgeText} font-bold`}>Backlog Rebalancer</span>
+                                        </div>
+
+                                        <p className={`text-xs ${theme.textSecondary}`}>
+                                            Dynamically redistributes missed study hours into fatigue-free micro-slots across your week.
+                                        </p>
+
+                                        <div className={`p-4 rounded-2xl border ${theme.cardBorder} bg-black/30 text-xs space-y-3`}>
+                                            <div className="flex justify-between items-center text-red-400 font-semibold">
+                                                <span>Missed Session: Organic Chemistry (2 Hours)</span>
+                                                <span className="text-[10px] border border-red-500/30 px-2 py-0.5 rounded bg-red-500/20 font-mono">Backlog</span>
+                                            </div>
+                                            
+                                            {planRepaired ? (
+                                                <div className="text-emerald-400 text-xs font-mono space-y-1.5 animate-float border-t border-white/10 pt-3">
+                                                    <p className="font-bold">✓ Plan Repair Executed:</p>
+                                                    <p className="text-slate-300 text-[11px]">• Split 2 hours into two 40-min micro-slots (Thu 6 AM & Fri 7 PM)</p>
+                                                    <p className="text-slate-300 text-[11px]">• Replaced long drills with 10-minute active recall summary</p>
+                                                </div>
+                                            ) : (
+                                                <div className={`text-xs ${theme.textSecondary} font-mono`}>
+                                                    Status: 1 missed study block needs redistribution.
+                                                </div>
+                                            )}
+
+                                            <div className="pt-2 flex justify-end">
+                                                <button 
+                                                    onClick={() => {
+                                                        setPlanRepaired(!planRepaired);
+                                                        showNotification(!planRepaired ? "✓ Plan Repair Executed!" : "Schedule Reset");
+                                                    }}
+                                                    className={`px-5 py-2.5 rounded-xl ${theme.accentBg} text-white text-xs font-bold transition-transform shadow hover:scale-105`}
+                                                >
+                                                    {planRepaired ? "Reset Schedule" : "Repair My Schedule (1-Tap)"}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Calendar Event List */}
+                                    <div className={`p-6 rounded-3xl border ${theme.cardBorder} ${theme.cardBg} ${theme.glow} space-y-4 shadow-xl`}>
+                                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                            <div className="flex items-center space-x-2">
+                                                <Icon name="calendar" className="w-5 h-5 text-cyan-400" />
+                                                <h2 className="text-sm md:text-base font-bold font-heading">Automated Calendar Targets</h2>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2.5">
+                                            {calendarEvents.map((evt) => (
+                                                <div key={evt.id} className="p-3.5 rounded-2xl border border-white/10 bg-black/30 flex justify-between items-center text-xs">
+                                                    <div>
+                                                        <p className="font-semibold text-slate-100">{evt.title}</p>
+                                                        <p className={`text-[11px] ${theme.textSecondary} font-mono`}>{evt.time}</p>
+                                                    </div>
+                                                    <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold font-mono">
+                                                        {evt.status}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 2-Minute Warmup Engine */}
+                                <div className="lg:col-span-5 flex flex-col space-y-5">
+                                    <div className={`p-6 rounded-3xl border ${theme.cardBorder} ${theme.cardBg} ${theme.glow} flex-1 flex flex-col space-y-4 shadow-xl`}>
+                                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                            <div className="flex items-center space-x-2">
+                                                <Icon name="zap" className="w-5 h-5 text-amber-400" />
+                                                <h2 className="text-sm md:text-base font-bold font-heading">2-Min Anti-Procrastination Sprint</h2>
+                                            </div>
+                                        </div>
+
+                                        <p className={`text-xs ${theme.textSecondary}`}>
+                                            Overcome study inertia instantly by solving 1 simple warmup challenge in 120 seconds.
+                                        </p>
+
+                                        <div className="flex-1 flex flex-col items-center justify-center p-6 rounded-2xl border border-white/10 bg-black/40 space-y-5 text-center">
+                                            <div className="text-5xl font-mono font-extrabold text-amber-400 tracking-wider">
+                                                {formatTime(timeLeft)}
+                                            </div>
+
+                                            <p className="text-xs font-medium text-slate-200 bg-black/50 p-4 rounded-2xl border border-amber-500/30 text-left leading-relaxed">
+                                                <strong>Warmup Problem:</strong> {activeWarmupProblem}
+                                            </p>
+
+                                            <div className="flex space-x-2 w-full pt-2">
+                                                {!timerActive ? (
+                                                    <button 
+                                                        onClick={() => setTimerActive(true)}
+                                                        className={`w-full py-3 rounded-2xl ${theme.accentBg} text-white text-xs font-bold shadow hover:scale-105 transition-transform`}
+                                                    >
+                                                        Start 2-Minute Sprint
+                                                    </button>
+                                                ) : (
+                                                    <button 
+                                                        onClick={() => setTimerActive(false)}
+                                                        className="w-full py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow"
+                                                    >
+                                                        Pause Timer
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {/* Tab 3: Mistake Autopsy */}
+                        {activeTab === "autopsy" && (
+                            <div className="lg:col-span-12 space-y-5">
+                                <div className={`p-6 md:p-8 rounded-3xl border ${theme.cardBorder} ${theme.cardBg} ${theme.glow} space-y-5 shadow-xl`}>
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                                        <div>
+                                            <h2 className="text-base md:text-lg font-bold font-heading">Mock Test Mistake Autopsy</h2>
+                                            <p className={`text-xs ${theme.textSecondary}`}>Analyze student test errors to eliminate recurring concept gaps.</p>
+                                        </div>
+                                        <span className={`text-xs px-3 py-1 rounded-full border ${theme.badgeBg} ${theme.badgeText} font-mono font-bold`}>Vision AI Diagnostic</span>
+                                    </div>
+
+                                    {/* Native File Input */}
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        ref={fileInputRef} 
+                                        onChange={handleImageSelect} 
+                                        className="hidden" 
+                                    />
+
+                                    <div 
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="border-2 border-dashed border-indigo-500/40 rounded-3xl p-8 text-center flex flex-col items-center justify-center space-y-3 bg-black/20 hover:border-indigo-500/80 transition-all cursor-pointer group"
+                                    >
+                                        {autopsyImagePreview ? (
+                                            <div className="relative group">
+                                                <img src={autopsyImagePreview} alt="Mock test problem preview" className="max-h-52 rounded-2xl border border-cyan-500/40 object-contain shadow-lg" />
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedAutopsyImage(null);
+                                                        setAutopsyImagePreview(null);
+                                                    }}
+                                                    className="absolute top-2 right-2 bg-red-600/90 text-white p-1.5 rounded-full hover:bg-red-500"
+                                                    title="Remove Image"
+                                                    aria-label="Remove uploaded image"
+                                                >
+                                                    <Icon name="trash" className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                                                    <Icon name="camera" className="w-6 h-6" />
+                                                </div>
+                                                <p className="text-xs md:text-sm text-slate-200 font-semibold">Upload photo of incorrect mock test question or paper</p>
+                                                <span className="text-[11px] text-slate-400 font-mono">Click to pick file or take photo with device camera</span>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    <div className="p-4 rounded-2xl border border-white/10 bg-black/30 space-y-3">
+                                        <p className="text-xs font-bold text-slate-200">Select Mistake Pattern Tag:</p>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                                            {[
+                                                { id: "concept", label: "Concept Gap", color: "bg-red-500/20 text-red-300 border-red-500/30" },
+                                                { id: "silly", label: "Silly Slip (Calculation)", color: "bg-amber-500/20 text-amber-300 border-amber-500/30" },
+                                                { id: "time", label: "Time Pressure Panic", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
+                                                { id: "misread", label: "Misread Question Data", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" }
+                                            ].map((tag) => (
+                                                <button 
+                                                    key={tag.id}
+                                                    onClick={() => setAutopsyTag(tag.id)}
+                                                    className={`p-3 rounded-2xl border text-xs font-semibold transition-all text-center ${tag.color} ${autopsyTag === tag.id ? 'ring-2 ring-cyan-400 scale-[1.02]' : 'opacity-70 hover:opacity-100'}`}
+                                                >
+                                                    {tag.label}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="pt-2 flex justify-end">
+                                            <button 
+                                                onClick={runErrorDiagnosis}
+                                                disabled={isLoading}
+                                                className={`px-6 py-2.5 rounded-2xl ${theme.accentBg} text-white text-xs font-bold shadow-md hover:scale-105 transition-transform flex items-center space-x-2`}
+                                            >
+                                                {isLoading ? <Icon name="cpu" className="w-4 h-4 animate-spin" /> : <Icon name="camera" className="w-4 h-4" />}
+                                                <span>Run AI Autopsy Diagnosis</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {autopsyResult && (
+                                        <div className="p-5 rounded-2xl border border-emerald-500/40 bg-emerald-950/30 text-xs space-y-2 animate-float font-mono shadow-inner">
+                                            <div className="text-emerald-400 font-bold text-sm">Autopsy Result: {autopsyResult.cause}</div>
+                                            <div className="text-slate-200">
+                                                <strong>Recommendation:</strong>
+                                                <FormattedText text={autopsyResult.recommendation} />
+                                            </div>
+                                            <p className="text-slate-200 pt-1 border-t border-white/10">• <strong>Schedule Adjustment:</strong> {autopsyResult.suggestedAction}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                    </main>
+
+                    {/* Settings & Voice Modal */}
+                    {showVoiceModal && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                            <div className={`max-w-md w-full rounded-3xl border ${theme.cardBorder} ${theme.cardBg} p-6 space-y-5 shadow-2xl`}>
+                                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                                    <h3 className="text-sm font-bold flex items-center space-x-2 text-cyan-400 font-heading">
+                                        <Icon name="settings" className="w-5 h-5" />
+                                        <span>AI Engine & Voice Settings</span>
+                                    </h3>
+                                    <button onClick={() => setShowVoiceModal(false)} className="text-slate-400 hover:text-white text-xs font-bold" aria-label="Close modal">✕</button>
+                                </div>
+
+                                {/* API Key Section */}
+                                <div className="p-4 rounded-2xl border border-amber-500/30 bg-black/40 space-y-2.5 text-xs">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-amber-300 flex items-center space-x-1.5">
+                                            <Icon name="key" className="w-4 h-4 text-amber-400" />
+                                            <span>Google Gemini API Key</span>
+                                        </span>
+                                        <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold ${apiKey ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}>
+                                            {apiKey ? 'Active' : 'Demo Mode'}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-slate-400 text-[11px] leading-relaxed">
+                                        Paste your key below to unlock live, unscripted responses from Gemini. Stored securely in your browser local storage.
+                                    </p>
+
+                                    <div className="flex space-x-2">
+                                        <input 
+                                            type="password"
+                                            placeholder="AIzaSy..."
+                                            value={inputApiKey}
+                                            onChange={(e) => setInputApiKey(e.target.value)}
+                                            className="flex-1 px-3 py-2 rounded-xl border border-white/10 bg-black/60 text-slate-100 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-amber-400"
+                                        />
+                                        <button 
+                                            onClick={() => handleSaveApiKey(inputApiKey)}
+                                            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow"
+                                        >
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Voice Section */}
+                                <div className="space-y-3 text-xs">
+                                    <p className="text-slate-300">
+                                        Detected <strong>{systemVoices.length}</strong> system voices on your device.
+                                    </p>
+
+                                    <div>
+                                        <label className="block text-slate-300 mb-1 font-medium">Manual Voice Override for {currentAssistant.spokenName}:</label>
+                                        <select 
+                                            value={manualOverrides[selectedAssistantKey] || ""}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setManualOverrides(prev => ({
+                                                    ...prev,
+                                                    [selectedAssistantKey]: val
+                                                }));
+                                            }}
+                                            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/50 text-slate-100 text-xs focus:outline-none"
+                                            aria-label="Manual Voice Override"
+                                        >
+                                            <option value="">Auto-Locked Match ({lockedVoiceMap[selectedAssistantKey]?.name || "System Standard"})</option>
+                                            {systemVoices.map((v, i) => (
+                                                <option key={i} value={v.name}>{v.name} ({v.lang})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-black/30 border border-white/10 font-mono text-[11px] space-y-1">
+                                        <p className="text-amber-300 font-bold">Active Assistant Profile:</p>
+                                        <p>• Profile: {currentAssistant.fullName}</p>
+                                        <p>• Role: {currentAssistant.title}</p>
+                                    </div>
+                                </div>
+
+                                <div className="pt-2 flex justify-end">
+                                    <button 
+                                        onClick={() => setShowVoiceModal(false)}
+                                        className={`px-5 py-2 rounded-xl ${theme.accentBg} text-white font-bold text-xs shadow`}
+                                    >
+                                        Done
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* WhatsApp Action Modal */}
+                    {whatsappModal.open && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                            <div className={`max-w-md w-full rounded-3xl border ${theme.cardBorder} ${theme.cardBg} p-6 space-y-4 shadow-2xl`}>
+                                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                                    <h3 className="text-sm font-bold flex items-center space-x-2 text-emerald-400 font-heading">
+                                        <Icon name="whatsapp" className="w-5 h-5" />
+                                        <span>Send WhatsApp Message</span>
+                                    </h3>
+                                    <button onClick={() => setWhatsappModal({ open: false, phone: "", message: "" })} className="text-slate-400 hover:text-white text-xs font-bold" aria-label="Close WhatsApp Modal">✕</button>
+                                </div>
+
+                                <div className="space-y-3 text-xs">
+                                    <div>
+                                        <label className="block text-slate-300 mb-1 font-medium">Recipient Phone (Optional):</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="+1234567890" 
+                                            value={whatsappModal.phone} 
+                                            onChange={(e) => setWhatsappModal({ ...whatsappModal, phone: e.target.value })}
+                                            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/50 text-slate-100 focus:outline-none font-mono"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-300 mb-1 font-medium">Message Draft:</label>
+                                        <textarea 
+                                            rows="4" 
+                                            value={whatsappModal.message} 
+                                            onChange={(e) => setWhatsappModal({ ...whatsappModal, message: e.target.value })}
+                                            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/50 text-slate-100 focus:outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end space-x-2 pt-2">
+                                    <button 
+                                        onClick={() => setWhatsappModal({ open: false, phone: "", message: "" })}
+                                        className="px-4 py-2 rounded-xl border border-white/10 text-slate-300 text-xs font-medium"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        onClick={executeWhatsAppLaunch}
+                                        className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow"
+                                    >
+                                        <Icon name="whatsapp" className="w-4 h-4" />
+                                        <span>Open WhatsApp</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Email Draft Action Modal */}
+                    {emailModal.open && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                            <div className={`max-w-md w-full rounded-3xl border ${theme.cardBorder} ${theme.cardBg} p-6 space-y-4 shadow-2xl`}>
+                                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                                    <h3 className="text-sm font-bold flex items-center space-x-2 text-indigo-400 font-heading">
+                                        <Icon name="mail" className="w-5 h-5" />
+                                        <span>Send Email Request</span>
+                                    </h3>
+                                    <button onClick={() => setEmailModal({ open: false, to: "", subject: "", body: "" })} className="text-slate-400 hover:text-white text-xs font-bold" aria-label="Close Email Modal">✕</button>
+                                </div>
+
+                                <div className="space-y-3 text-xs">
+                                    <div>
+                                        <label className="block text-slate-300 mb-1 font-medium">To:</label>
+                                        <input 
+                                            type="email" 
+                                            placeholder="teacher@school.edu" 
+                                            value={emailModal.to} 
+                                            onChange={(e) => setEmailModal({ ...emailModal, to: e.target.value })}
+                                            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/50 text-slate-100 focus:outline-none font-mono"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-300 mb-1 font-medium">Subject:</label>
+                                        <input 
+                                            type="text" 
+                                            value={emailModal.subject} 
+                                            onChange={(e) => setEmailModal({ ...emailModal, subject: e.target.value })}
+                                            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/50 text-slate-100 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-slate-300 mb-1 font-medium">Body:</label>
+                                        <textarea 
+                                            rows="4" 
+                                            value={emailModal.body} 
+                                            onChange={(e) => setEmailModal({ ...emailModal, body: e.target.value })}
+                                            className="w-full px-3 py-2 rounded-xl border border-white/10 bg-black/50 text-slate-100 focus:outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end space-x-2 pt-2">
+                                    <button 
+                                        onClick={() => setEmailModal({ open: false, to: "", subject: "", body: "" })}
+                                        className="px-4 py-2 rounded-xl border border-white/10 text-slate-300 text-xs font-medium"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        onClick={executeEmailLaunch}
+                                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow"
+                                    >
+                                        <Icon name="mail" className="w-4 h-4" />
+                                        <span>Open Mail Client</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            );
+        }
+
+        // Mount Root Element
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
